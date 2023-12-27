@@ -56,5 +56,24 @@ df = pd.read_csv(data + 'xiang_kuperberg_eng2_surprisals_evenso_however_stats2.c
 df['gpt2_target_surprisal'] = df.apply(lambda x: target_surprisal(gpt2, x.SENTENCE, x.TARGET_WORD), axis=1)
 df['distilgpt2_target_surprisal'] = df.apply(lambda x: target_surprisal(distilgpt2, x.SENTENCE, x.TARGET_WORD), axis=1)
 df['gptneo_target_surprisal'] = df.apply(lambda x: target_surprisal(gptneo, x.SENTENCE, x.TARGET_WORD), axis=1)
-df.to_csv(output + 'xiang_kuperberg_eng2_surprisals_evenso_however_stats2.csv')
+df.to_csv(output + 'results.csv')
 df.head()
+
+cols = ['gpt2Chinese_avg',
+        'gpt2Chinese_sum']
+for col in cols:
+  if 'avg' in col and 'gpt2' in col:
+    chi[col] = chi.apply(lambda x: target_surprisal_avg(gpt2Chinese, x['SENTENCE'],
+                                                            x['TARGET_WORD']), axis=1)
+  if 'sum' in col and 'gpt2' in col:
+    chi[col] = chi.apply(lambda x: target_surprisal_sum(gpt2Chinese, x['SENTENCE'],
+                                                            x['TARGET_WORD']), axis=1)
+  chi.to_csv(output + 'chi_contr_data_surp.csv')
+  print('finished: ', col)
+cols = ['gpt2Chinese_tokens_len']
+for col in cols:
+  if 'gpt2' in col:
+    chi[col] = chi.apply(lambda x: get_tokens_len_score(x['SENTENCE'], gpt2Chinese), axis=1)
+  chi.to_csv(output + 'chi_contr_data_surp.csv')
+  print('finished: ', col)
+chi
