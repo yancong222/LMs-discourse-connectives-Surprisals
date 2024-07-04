@@ -4,3 +4,5 @@ Title: On the Influence of Discourse Connectives on the Predictions of Humans an
 
 Auhtors: James Richard Britton, Yan Cong, Emmanuele Chersoni (Corresponding author: emmanuele.chersoni@polyu.edu.hk), Yu-Yin Hsu and
 Philippe Blache
+
+Scripts folder contain R and Python code for the data analysis in the paper.
