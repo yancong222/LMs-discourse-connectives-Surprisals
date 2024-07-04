@@ -1,24 +1,18 @@
+# title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge
+# author: Britton, Cong, Chersoni, Hsu, and Blache
+# on July 2024
+
 import pandas as pd
 import numpy as np
+# !pip install minicons
 from minicons import scorer
-gpt2 = scorer.IncrementalLMScorer('gpt2', 'cuda') 
-distilgpt2 = scorer.IncrementalLMScorer('distilgpt2', 'cuda')
-gptneo = scorer.IncrementalLMScorer('EleutherAI/gpt-neo-1.3B', 'cuda')
 
-gpt2Italian = scorer.IncrementalLMScorer('GroNLP/gpt2-small-italian', 'cuda')
+# load NLMs
+model2Italian = scorer.IncrementalLMScorer('LorenzoDeMattei/GePpeTto', 'cuda')
 gpt2Chinese = scorer.IncrementalLMScorer('uer/gpt2-chinese-cluecorpussmall', 'cuda')
 gpt2French = scorer.IncrementalLMScorer('dbddv01/gpt2-french-small', 'cuda') 
 
-def target_surprisal(model, sentence, target):
-  temp = []
-  temp.append(sentence)
-  surp = model.token_score(temp, surprisal = True, base_two = True)
-  tuple_list = surp[0]
-  result = [y[1] for x, y in enumerate(tuple_list) if y[0] == target]
-  if len(result) == 0:
-    result = [y[1] for x, y in enumerate(tuple_list) if y[0] in target]
-  return round(np.nanmean(result), 2)
-
+# utility functions
 def target_surprisal_sum(model, sentence, target):
   temp = []
   temp.append(sentence)
@@ -31,6 +25,16 @@ def target_surprisal_sum(model, sentence, target):
     result = [y[1] for x, y in enumerate(tuple_list) if y[0] in target]
     return round(np.nansum(result[:-1]), 2) 
 
+def target_surprisal_avg(model, sentence, target):
+  temp = []
+  temp.append(sentence)
+  surp = model.token_score(temp, surprisal = True, base_two = True)
+  tuple_list = surp[0]
+  result = [y[1] for x, y in enumerate(tuple_list) if y[0] == target]
+  if len(result) == 0:
+    result = [y[1] for x, y in enumerate(tuple_list) if y[0] in target]
+  return round(np.nanmean(result), 2)
+
 def get_tokens_len_score(sent, model):
   input = []
   input.append(sent)
@@ -39,7 +43,6 @@ def get_tokens_len_score(sent, model):
   return len(output[0])
 
 def target_oov(model, sentence, target):
-
   temp = []
   temp.append(sentence)
   surp = model.token_score(temp, surprisal = True, base_two = True)
@@ -50,15 +53,17 @@ def target_oov(model, sentence, target):
   else:
     return 1
 
+##Italian dataset
 data = ('/your input folder/')
 output = ('/your output folder/')
-df = pd.read_csv(data + 'xiang_kuperberg_eng2_surprisals_evenso_however_stats2.csv', index_col = 0)
-df['gpt2_target_surprisal'] = df.apply(lambda x: target_surprisal(gpt2, x.SENTENCE, x.TARGET_WORD), axis=1)
-df['distilgpt2_target_surprisal'] = df.apply(lambda x: target_surprisal(distilgpt2, x.SENTENCE, x.TARGET_WORD), axis=1)
-df['gptneo_target_surprisal'] = df.apply(lambda x: target_surprisal(gptneo, x.SENTENCE, x.TARGET_WORD), axis=1)
-df.to_csv(output + 'results.csv')
+df = pd.read_csv(data + 'Italian_data.csv', index_col = 0)
+df['Ita_target_surprisal'] = df.apply(lambda x: target_surprisal_sum(model2Italian, x.SENTENCE, x.TARGET_WORD), axis=1)
+df['Ita_seq_len'] = df.apply(lambda x: get_tokens_len_score(x.SENTENCE, model2Italian), axis=1)
+df['Ita_target_OOV'] = df.apply(lambda x: target_oov(model2Italian, x.SENTENCE, x.TARGET_WORD), axis=1)
+df.to_csv(output + 'Ita_results.csv')
 df.head()
 
+##Chinese dataset
 cols = ['gpt2Chinese_avg',
         'gpt2Chinese_sum']
 for col in cols:
@@ -68,12 +73,17 @@ for col in cols:
   if 'sum' in col and 'gpt2' in col:
     chi[col] = chi.apply(lambda x: target_surprisal_sum(gpt2Chinese, x['SENTENCE'],
                                                             x['TARGET_WORD']), axis=1)
-  chi.to_csv(output + 'chi_contr_data_surp.csv')
+  chi.to_csv(output + 'Chi_results.csv')
   print('finished: ', col)
+
 cols = ['gpt2Chinese_tokens_len']
 for col in cols:
   if 'gpt2' in col:
     chi[col] = chi.apply(lambda x: get_tokens_len_score(x['SENTENCE'], gpt2Chinese), axis=1)
-  chi.to_csv(output + 'chi_contr_data_surp.csv')
+  chi.to_csv(output + 'Chi_results.csv')
   print('finished: ', col)
 chi
+
+chi['Chi_target_OOV'] = df.apply(lambda x: target_oov(gpt2Chinese, x.SENTENCE, x.TARGET_WORD), axis=1)
+chi.to_csv(output + 'Chi_results.csv')
+
