@@ -1,10 +1,9 @@
 # title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge
 # author: Britton, Cong, Chersoni, Hsu, and Blache
-# on July 2024
+# on Sep 2024
 
 library(ggplot2)
 mydata = read.csv('ita_data.csv', header = TRUE)
-# select relevant columns
 df = mydata[, c('ITEM_ID', 
                 'CONDITION', 
                 'Plausibility', 
@@ -32,7 +31,6 @@ p2
 
 ########################################
 mydata = read.csv('chi_data_surp.csv', header = TRUE)
-# select relevant columns
 df = mydata[, c('ITEM_ID', 
                 'CONDITION', 
                 'Plausibility', 
@@ -57,10 +55,9 @@ p8 <- ggplot(df, aes(x=factor(CONDITION),
   theme(legend.position="none")
 p8
 
-# same code structure repeats for other datasets
-##############
+# same code structure recycles for other datasets
+############################
 
-##############
 library(gridExtra)
 p = grid.arrange(p2, p4,
                  p6, p8,
