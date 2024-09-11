@@ -1,16 +1,18 @@
 # title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge
 # author: Britton, Cong, Chersoni, Hsu, and Blache
-# on July 2024
+# on Sep 2024
 
 import pandas as pd
 import numpy as np
 # !pip install minicons
 from minicons import scorer
 
-# load NLMs
+# load all the NLMs
 model2Italian = scorer.IncrementalLMScorer('LorenzoDeMattei/GePpeTto', 'cuda')
+gpt2Italian = scorer.IncrementalLMScorer('GroNLP/gpt2-small-italian', 'cuda') 
+llama2Italian7B = scorer.IncrementalLMScorer('swap-uniba/LLaMAntino-2-7b-hf-ITA', 'cuda') 
 gpt2Chinese = scorer.IncrementalLMScorer('uer/gpt2-chinese-cluecorpussmall', 'cuda')
-gpt2French = scorer.IncrementalLMScorer('dbddv01/gpt2-french-small', 'cuda') 
+llama2Chinese7B = scorer.IncrementalLMScorer('hfl/chinese-llama-2-7b', 'cuda')
 
 # utility functions
 def target_surprisal_sum(model, sentence, target):
@@ -22,6 +24,8 @@ def target_surprisal_sum(model, sentence, target):
   if len(result) == 1:
     return round(np.nansum(result), 2)
   else:
+    if not isinstance(target, (list, tuple, str)):
+        target = [target]
     result = [y[1] for x, y in enumerate(tuple_list) if y[0] in target]
     return round(np.nansum(result[:-1]), 2) 
 
@@ -60,30 +64,6 @@ df = pd.read_csv(data + 'Italian_data.csv', index_col = 0)
 df['Ita_target_surprisal'] = df.apply(lambda x: target_surprisal_sum(model2Italian, x.SENTENCE, x.TARGET_WORD), axis=1)
 df['Ita_seq_len'] = df.apply(lambda x: get_tokens_len_score(x.SENTENCE, model2Italian), axis=1)
 df['Ita_target_OOV'] = df.apply(lambda x: target_oov(model2Italian, x.SENTENCE, x.TARGET_WORD), axis=1)
-df.to_csv(output + 'Ita_results.csv')
-df.head()
+df.to_csv(output + 'results.csv')
 
-##Chinese dataset
-cols = ['gpt2Chinese_avg',
-        'gpt2Chinese_sum']
-for col in cols:
-  if 'avg' in col and 'gpt2' in col:
-    chi[col] = chi.apply(lambda x: target_surprisal_avg(gpt2Chinese, x['SENTENCE'],
-                                                            x['TARGET_WORD']), axis=1)
-  if 'sum' in col and 'gpt2' in col:
-    chi[col] = chi.apply(lambda x: target_surprisal_sum(gpt2Chinese, x['SENTENCE'],
-                                                            x['TARGET_WORD']), axis=1)
-  chi.to_csv(output + 'Chi_results.csv')
-  print('finished: ', col)
-
-cols = ['gpt2Chinese_tokens_len']
-for col in cols:
-  if 'gpt2' in col:
-    chi[col] = chi.apply(lambda x: get_tokens_len_score(x['SENTENCE'], gpt2Chinese), axis=1)
-  chi.to_csv(output + 'Chi_results.csv')
-  print('finished: ', col)
-chi
-
-chi['Chi_target_OOV'] = df.apply(lambda x: target_oov(gpt2Chinese, x.SENTENCE, x.TARGET_WORD), axis=1)
-chi.to_csv(output + 'Chi_results.csv')
-
+## Recycle the Italian code snippets and run them on Chinese dataset
