@@ -1,10 +1,9 @@
 # title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge
 # author: Britton, Cong, Chersoni, Hsu, and Blache
-# on July 2024
+# on Sep 2024
 
 ## Italian dataset
-mydata = read.csv('italian_contr_data_surp.csv', header = TRUE)
-# select relevant columns
+mydata = read.csv('dataset.csv', header = TRUE)
 df = mydata[, c('ITEM_ID', 
                 'CONDITION', 
                 'Plausibility', 
@@ -37,8 +36,7 @@ model2Italian_sum.emm = emmeans(model2Italian_sum, specs = pairwise~Plausibility
 summary(model2Italian_sum.emm)
 
 # Chinese dataset
-mydata = read.csv('chi_data_surp.csv', header = TRUE)
-# select relevant columns
+mydata = read.csv('dataset.csv', header = TRUE)
 df = mydata[, c('ITEM_ID', 
                 'CONDITION', 
                 'Plausibility', 
