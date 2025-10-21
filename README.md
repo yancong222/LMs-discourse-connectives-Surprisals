@@ -1,6 +1,8 @@
 # LMs-discourse-connectives-Surprisals
 
-Title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge
+Title: On the Influence of Discourse Connectives on the Predictions of Humans and Language Models: The Role of Event Knowledge 
+
+[paper link: https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2024.1363120/full]
 
 Auhtors: James Richard Britton, Yan Cong, Emmanuele Chersoni (Corresponding author: emmanuele.chersoni@polyu.edu.hk), Yu-Yin Hsu and
 Philippe Blache
